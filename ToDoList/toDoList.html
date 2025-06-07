@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To Do List</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: linear-gradient(
+          to left,
+          rgb(0, 200, 255),
+          rgb(0, 100, 128)
+        );
+        font-family: Arial, sans-serif;
+      }
+      header {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .yapilacaklar-ekle {
+        margin: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+      }
+      .icerik {
+        height: 40px;
+        width: 500px;
+        border-radius: 8px;
+        padding-left: 10px;
+        font-size: 16px;
+        border: 2px solid transparent;
+      }
+      #ekle-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: black;
+        color: white;
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+      }
+      .yapilacaklar-listesi {
+        margin: 10px 20px;
+        padding: 10px 20px;
+        background-color: rgba(255, 255, 255, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 8px;
+        font-size: 20px;
+        color: white;
+      }
+      .ekle-sil {
+        display: flex;
+        gap: 8px;
+      }
+      .button {
+        padding: 5px 10px;
+        background-color: black;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      footer {
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        width: 100%;
+        height: 50px;
+        padding: 15px;
+        background-color: #000;
+        color: rgb(255, 255, 255);
+        text-align: center;
+      }
+      .themeColor {
+        border-radius: 12px;
+        margin: 8px;
+        padding: 8px;
+      }
+      .dark-mode {
+        background: linear-gradient(to right, #1c1c1c, #2e2e2e);
+        color: white;
+      }
+
+      .dark-mode .yapilacaklar-listesi {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      .dark-mode .button,
+      .dark-mode #ekle-btn,
+      .dark-mode .themeColor {
+        background-color: white;
+        color: black;
+      }
+
+      .dark-mode footer {
+        background-color: #111;
+        color: white;
+      }
+    </style>
+  </head>
+  <body class="dark-mode">
+    <header>
+      <div style="flex: 1; text-align: center">
+        <h1>To Do List</h1>
+      </div>
+      <div>
+        <button class="themeColor" onclick="TemaRengi()">☀️🌙</button>
+      </div>
+    </header>
+    <main>
+      <section class="yapilacaklar-ekle">
+        <input
+          type="text"
+          class="icerik"
+          id="gorevInput"
+          placeholder=" Bu gün Ne Yapacaksın ?"
+        />
+        <button id="ekle-btn">+</button>
+      </section>
+      <div id="gorev-listesi-container"></div>
+    </main>
+    <footer>&copy;2025 Tüm Hakları Saklıdır.buraksenol00@outlook.com</footer>
+    <script>
+      function TemaRengi() {
+        document.body.classList.toggle("dark-mode");
+        
+        const isDarkMode = document.body.classList.contains("dark-mode");
+        localStorage.setItem("tema", isDarkMode ? "dark" : "light");
+      }
+
+      const ekleBtn = document.getElementById("ekle-btn");
+      const input = document.getElementById("gorevInput");
+      const listeAlan = document.getElementById("gorev-listesi-container");
+      let duzenlenenSatir = null;
+
+      function TemaYukle() {
+        const kaydedilmisTema = localStorage.getItem("tema");
+        if (kaydedilmisTema === "light") {
+          document.body.classList.remove("dark-mode");
+        }
+       
+      }
+
+      function GorevleriYukle() {
+        const kaydedilmisGorevler = localStorage.getItem("gorevler");
+        if (kaydedilmisGorevler) {
+          const gorevDizisi = JSON.parse(kaydedilmisGorevler);
+          gorevDizisi.forEach(gorev => {
+            GorevElementiOlustur(gorev);
+          });
+        }
+      }
+
+      function GorevleriKaydet() {
+        const gorevEtiketleri = document.querySelectorAll('.yapilacaklar-listesi label');
+        const gorevDizisi = [];
+        gorevEtiketleri.forEach(etiket => {
+          gorevDizisi.push(etiket.innerText);
+        });
+        localStorage.setItem('gorevler', JSON.stringify(gorevDizisi));
+      }
+
+      
+      function GorevElementiOlustur(gorevMetni) {
+        const yeniGorev = document.createElement("section");
+        yeniGorev.classList.add("yapilacaklar-listesi");
+
+       
+        yeniGorev.innerHTML = `
+          <label>${gorevMetni}</label>
+          <div class="ekle-sil">
+            <button class="button duzenle-btn">Düzenle</button>
+            <button class="button sil-btn">Sil</button>
+          </div>
+        `;
+        
+        listeAlan.appendChild(yeniGorev);
+
+       
+        yeniGorev.querySelector(".sil-btn").addEventListener("click", function() {
+          yeniGorev.remove();
+          GorevleriKaydet(); 
+        });
+
+       
+        yeniGorev.querySelector(".duzenle-btn").addEventListener("click", function() {
+          input.value = yeniGorev.querySelector("label").innerText;
+          duzenlenenSatir = yeniGorev;
+          ekleBtn.innerText = "✓";
+        });
+      }
+
+     
+      window.addEventListener('load', function() {
+        TemaYukle();    
+        GorevleriYukle(); 
+      });
+
+     
+      ekleBtn.addEventListener("click", function () {
+        const gorev = input.value.trim();
+
+        if (gorev === "") {
+          alert("Lütfen Görev Ekleyiniz!");
+          return;
+        }
+
+        
+        if (duzenlenenSatir) {
+          duzenlenenSatir.querySelector("label").innerText = gorev;
+          duzenlenenSatir = null;
+          input.value = "";
+          ekleBtn.innerText = "+";
+          GorevleriKaydet(); 
+          return;
+        }
+
+        
+        GorevElementiOlustur(gorev);
+        input.value = "";
+        GorevleriKaydet(); 
+      });
+
+      
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          ekleBtn.click();
+        }
+      });
+     
+    </script>
+  </body>
+</html>
